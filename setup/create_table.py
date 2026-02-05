@@ -35,7 +35,12 @@ def set_up_tables(session: Session):
         ]
     )
 
-    table_builder.write.mode('overwrite').save_as_table([DB, SCHEMA, 'TRIPS'], mode='overwrite')
+    table_builder.write.mode('overwrite').save_as_table([DB, SCHEMA, 'WEATHER'], mode='overwrite')
+
+
+def get_table(session: Session):
+    return session.table('WEATHER_DB.PUBLIC.WEATHER').show()
+
 
 
 def main():
@@ -44,6 +49,7 @@ def main():
 
     print('Creating tables...')
     set_up_tables(session=session)
+    get_table(session=session)
 
 
 if __name__ == '__main__':
