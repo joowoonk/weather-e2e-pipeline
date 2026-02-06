@@ -20,11 +20,18 @@ def transform_tables(session: Session, schema, source_table) -> int:
     hourly_date_df = transform_by_hourly_and_date(df)
     hourly_date_df.write.save_as_table([SOURCE_DB, schema, "WEATHER_TIME"], table_type="", mode="overwrite")
 
-    f_conversion_to_c = tranform_from_f_to_c(hourly_date_df)
-    f_conversion_to_c.write.save_as_table([SOURCE_DB, schema, "WEATHER_TEMP"], table_type="", mode="overwrite")
+    f_conversion_to_c = tranform_from_f_to_c(df)
+    f_conversion_to_c.write.save_as_table([SOURCE_DB, schema, "WEATHER_TEMP_COVERSION"], table_type="", mode="overwrite")
+
+    is_snow_df = add_is_snow(df)
+    is_rain_df = add_is_rain(is_snow_df)
+
+    is_rain_df.write.save_as_table([SOURCE_DB, schema, "WEATHER_IS_SNOW_RAIN"], table_type="", mode="overwrite")
+
 
     hourly_date_counts = hourly_date_df.count()
     f_conversion_to_c = f_conversion_to_c.count()
+    is_rain_df = is_rain_df.count()
 
     return hourly_date_counts + f_conversion_to_c
 

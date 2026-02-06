@@ -17,5 +17,22 @@ def tranform_from_f_to_c(df: DataFrame) -> DataFrame:
     Example of another transformation function that could be added to this module.
     """
     df = df.with_column("TEMPERATURE_C", (col("TEMPERATURE_F") - 32) * 5.0/9.0)
-    
+
+
+    return df
+
+def add_is_snow(df: DataFrame) -> DataFrame: 
+    """
+    Example of another transformation function that could be added to this module.
+    """
+    df = df.with_column("IS_SNOW", col("CONDITION") == "Snow")
+
+    return df
+
+def add_is_rain(df: DataFrame) -> DataFrame: 
+    """
+    Example of another transformation function that could be added to this module.
+    """
+    df = df.with_column("IS_RAIN", col("CONDITION") == "Rain")
+
     return df
