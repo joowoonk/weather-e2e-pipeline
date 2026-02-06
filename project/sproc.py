@@ -1,6 +1,6 @@
 from snowflake.snowpark.dataframe import DataFrame
 from snowflake.snowpark.session import Session
-# from project.transformers import *
+from project.transformers import *
 from project.utils import get_env_var_config
 from snowflake.snowpark.functions import col, to_date, hour, to_timestamp
 
@@ -18,10 +18,15 @@ def create_fact_tables(session: Session, schema, source_table) -> int:
 
     # Delegate transformations to the modular transformer function
     df2 = transform_by_hourly_and_date(df)
+    df2 = tranform_from_f_to_c(df2)
 
     df2.write.save_as_table([SOURCE_DB, schema, "WEATHER_TIME"], table_type="", mode="overwrite")
 
-    return df2.count()
+    
+
+    row_counts = df2.count()
+
+    return row_counts
 
 
 if __name__ == "__main__":
@@ -29,7 +34,7 @@ if __name__ == "__main__":
     session = Session.builder.configs(get_env_var_config()).create()
 
     print("Running job...")
-    # rows = create_fact_tables(session, "PUBLIC", "WEATHER")
+    rows = create_fact_tables(session, "PUBLIC", "WEATHER")
 
-    # print(f'Job complete. Number of rows created: {rows}')
-    session.table("WEATHER_DB.PUBLIC.WEATHER_TIME").show(10)
+    print(f'Job complete. Number of rows created: {rows}')
+    # session.table("WEATHER_DB.PUBLIC.WEATHER_TIME").show(10)
