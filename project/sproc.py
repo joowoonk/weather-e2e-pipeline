@@ -5,7 +5,7 @@ from project.utils import get_env_var_config
 from snowflake.snowpark.functions import col, to_date, hour, to_timestamp
 
 
-def create_fact_tables(session: Session, schema, source_table) -> int:
+def transform_tables(session: Session, schema, source_table) -> int:
     """
     This job applies the transformations in `project.transformers` to the weather dataset
     and creates more tables under WEATHER.PUBLIC.
@@ -17,16 +17,18 @@ def create_fact_tables(session: Session, schema, source_table) -> int:
     df: DataFrame = session.table([SOURCE_DB, schema, source_table])
 
     # Delegate transformations to the modular transformer function
-    df2 = transform_by_hourly_and_date(df)
-    df2 = tranform_from_f_to_c(df2)
+    hourly_date_df = transform_by_hourly_and_date(df)
+    hourly_date_df.write.save_as_table([SOURCE_DB, schema, "WEATHER_TIME"], table_type="", mode="overwrite")
 
-    df2.write.save_as_table([SOURCE_DB, schema, "WEATHER_TIME"], table_type="", mode="overwrite")
+    f_conversion_to_c = tranform_from_f_to_c(hourly_date_df)
+    f_conversion_to_c.write.save_as_table([SOURCE_DB, schema, "WEATHER_TEMP"], table_type="", mode="overwrite")
 
-    
+    hourly_date_counts = hourly_date_df.count()
+    f_conversion_to_c = f_conversion_to_c.count()
 
-    row_counts = df2.count()
+    return hourly_date_counts + f_conversion_to_c
 
-    return row_counts
+
 
 
 if __name__ == "__main__":
@@ -34,7 +36,7 @@ if __name__ == "__main__":
     session = Session.builder.configs(get_env_var_config()).create()
 
     print("Running job...")
-    rows = create_fact_tables(session, "PUBLIC", "WEATHER")
+    rows = transform_tables(session, "PUBLIC", "WEATHER")
 
     print(f'Job complete. Number of rows created: {rows}')
-    # session.table("WEATHER_DB.PUBLIC.WEATHER_TIME").show(10)
+
