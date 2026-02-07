@@ -52,7 +52,7 @@ def daily_aggregations(df: DataFrame) -> DataFrame:
     daily_df = df.group_by(
         "CITY_ID",
         "CITY_NAME",
-        "OBSERVATION_TIME"
+        "OBSERVATION_DATE"
     ).agg(
         avg("TEMPERATURE_F").alias("AVG_TEMPERATURE_F"),
         min("TEMPERATURE_F").alias("MIN_TEMPERATURE_F"),
