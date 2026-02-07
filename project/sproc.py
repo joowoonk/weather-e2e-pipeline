@@ -2,7 +2,6 @@ from snowflake.snowpark.dataframe import DataFrame
 from snowflake.snowpark.session import Session
 from project.transformers import *
 from project.utils import get_env_var_config
-from snowflake.snowpark.functions import col, to_date, hour, to_timestamp
 
 
 def transform_tables(session: Session, schema, source_table) -> int:
@@ -17,23 +16,24 @@ def transform_tables(session: Session, schema, source_table) -> int:
     df: DataFrame = session.table([SOURCE_DB, schema, source_table])
 
     # Delegate transformations to the modular transformer function
-    hourly_date_df = transform_by_hourly_and_date(df)
-    hourly_date_df.write.save_as_table([SOURCE_DB, schema, "WEATHER_TIME"], table_type="", mode="overwrite")
-
-    f_conversion_to_c = tranform_from_f_to_c(df)
-    f_conversion_to_c.write.save_as_table([SOURCE_DB, schema, "WEATHER_TEMP_COVERSION"], table_type="", mode="overwrite")
-
-    is_snow_df = add_is_snow(df)
-    is_rain_df = add_is_rain(is_snow_df)
-
-    is_rain_df.write.save_as_table([SOURCE_DB, schema, "WEATHER_IS_SNOW_RAIN"], table_type="", mode="overwrite")
+    enriched_df = transform_by_hourly_and_date(df)
+    enriched_df.write.save_as_table([SOURCE_DB, schema, "WEATHER_TIME"], table_type="", mode="overwrite")
 
 
-    hourly_date_counts = hourly_date_df.count()
-    f_conversion_to_c = f_conversion_to_c.count()
-    is_rain_df = is_rain_df.count()
+    enriched_df = tranform_from_f_to_c(df)
+    enriched_df.write.save_as_table([SOURCE_DB, schema, "WEATHER_TEMP_COVERSION"], table_type="", mode="overwrite")
 
-    return hourly_date_counts + f_conversion_to_c
+    enriched_df = add_is_snow(df)
+    enriched_df = add_is_rain(df)
+
+    enriched_df.write.save_as_table([SOURCE_DB, schema, "WEATHER_IS_SNOW_RAIN"], table_type="", mode="overwrite")
+    
+    enriched_df = daily_aggregations(df)
+    enriched_df.write.save_as_table([SOURCE_DB, schema, "WEATHER_DAILY_AGGREGATIONS"], table_type="", mode="overwrite")
+
+    row_counts = enriched_df.count()
+
+    return row_counts
 
 
 

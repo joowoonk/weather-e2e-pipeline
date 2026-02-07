@@ -1,5 +1,5 @@
 from snowflake.snowpark.dataframe import DataFrame, col
-from snowflake.snowpark.functions import to_timestamp, to_date, hour
+from snowflake.snowpark.functions import to_timestamp, to_date, hour, avg, min, max, sum, when
 
 def transform_by_hourly_and_date(df: DataFrame) -> DataFrame:
 	"""
@@ -36,3 +36,29 @@ def add_is_rain(df: DataFrame) -> DataFrame:
     df = df.with_column("IS_RAIN", col("CONDITION") == "Rain")
 
     return df
+
+def daily_aggregations(df: DataFrame) -> DataFrame:
+    """
+    Example of another transformation function that could be added to this module.
+    """
+    df = df.with_column(
+        "IS_RAIN",
+        when(col("CONDITION") == "Rain", 1).otherwise(0)
+    ).with_column(
+        "IS_SNOW",
+        when(col("CONDITION") == "Snow", 1).otherwise(0)
+    )
+
+    daily_df = df.group_by(
+        "CITY_ID",
+        "CITY_NAME",
+        "OBSERVATION_TIME"
+    ).agg(
+        avg("TEMPERATURE_F").alias("AVG_TEMPERATURE_F"),
+        min("TEMPERATURE_F").alias("MIN_TEMPERATURE_F"),
+        max("TEMPERATURE_F").alias("MAX_TEMPERATURE_F"),
+        sum("IS_RAIN").alias("RAIN_HOURS"),
+        sum("IS_SNOW").alias("SNOW_HOURS")
+    )
+
+    return daily_df
