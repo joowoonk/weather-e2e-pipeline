@@ -18,25 +18,25 @@ def transform_tables(session: Session, schema, source_table) -> int:
     # Delegate transformations to the modular transformer function
     enriched_df = transform_by_hourly_and_date(df)
     enriched_df.write.save_as_table([SOURCE_DB, schema, "WEATHER_TIME"], table_type="", mode="overwrite")
-    total_row_count += enriched_df.count()
+    print(f"WEATHER_TIME rows: {enriched_df.count()}")
 
     enriched_df = tranform_from_f_to_c(enriched_df)
     enriched_df.write.save_as_table([SOURCE_DB, schema, "WEATHER_TEMP_COVERSION"], table_type="", mode="overwrite")
-    total_row_count += enriched_df.count()
+    print(f"WEATHER_TEMP_COVERSION rows: {enriched_df.count()}")
 
     enriched_df = add_is_snow(enriched_df)
-    total_row_count += enriched_df.count()
+    print(f"WEATHER_IS_SNOW rows: {enriched_df.count()}")
     enriched_df = add_is_rain(enriched_df)
-    total_row_count += enriched_df.count()
+    print(f"WEATHER_IS_SNOW_RAIN rows: {enriched_df.count()}")
 
     enriched_df.write.save_as_table([SOURCE_DB, schema, "WEATHER_IS_SNOW_RAIN"], table_type="", mode="overwrite")
     
     enriched_df = daily_aggregations(enriched_df)
-    total_row_count += enriched_df.count()
+    print(f"WEATHER_DAILY_AGGREGATIONS rows: {enriched_df.count()}")
     
     enriched_df.write.save_as_table([SOURCE_DB, schema, "WEATHER_DAILY_AGGREGATIONS"], table_type="", mode="overwrite")
 
-    return total_row_count
+    return 
 
 
 
