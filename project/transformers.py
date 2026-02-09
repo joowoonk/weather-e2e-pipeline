@@ -7,8 +7,7 @@ def transform_by_hourly_and_date(df: DataFrame) -> DataFrame:
 	This keeps transformations modular so `sproc.py` can import and reuse them.
 	"""
 	df = df.with_column("OBSERVATION_TS", to_timestamp(col("OBSERVATION_TIME")))
-	df = df.with_column("OBSERVATION_DATE", to_date(col("OBSERVATION_TS"))).with_column(
-		"OBSERVATION_HOUR", hour(col("OBSERVATION_TS"))
+	df = df.with_column("OBSERVATION_DATE", to_date(col("OBSERVATION_TS"))).with_column("OBSERVATION_HOUR", hour(col("OBSERVATION_TS"))
 	)
 	return df
 
