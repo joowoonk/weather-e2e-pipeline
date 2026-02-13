@@ -1,9 +1,9 @@
-# Weather E2E Pipeline
+# ForecastForge
 
-A small end-to-end weather data pipeline using Snowflake Snowpark.
+Build reliable weather analytics pipelines with Snowflake Snowpark.
 
 Overview
-- Small ETL-style project that reads a source weather table, applies transformations, and writes derived tables.
+- An end-to-end ETL project that ingests raw weather data, applies transformations, and produces hourly/daily analytics tables for analysis.
 - Key modules:
   - `project/utils.py` — environment/config helpers
   - `project/transformers.py` — transformation functions (modular)
